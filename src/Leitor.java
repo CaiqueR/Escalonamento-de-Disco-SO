@@ -1,20 +1,17 @@
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 
 class Leitor {
     private static String path;
-    int[][] pesos = null;
+    public static int[][] pesos = null;
     private int NumSectors;
     private int NumTracks;
     private int StartPosition;
     ArrayList<String> numEmString = new ArrayList<String>();
     String linhaArq;
 
-    public Leitor(String path) throws Exception {
+    public Leitor(String path) {
         this.path = path;
         try {
             FileReader arq = new FileReader(path);
@@ -69,24 +66,25 @@ class Leitor {
         }
     }
 
-    public void FCFS(int[][] mat) throws Exception {
+    public double[] FCFS() {
         double tempMedAcesso=0;
         double tempMedEspera=0;
         double cilindroanterior=0;
         double aux=0;
-        Leitor L = new Leitor(path);
+        double[] resultado = new double[2];
         int valoranterior=StartPosition;
 
-        for (int i = 0; i < mat.length; i++) {
-            tempMedEspera+=cilindroanterior-mat[i][0];
-            tempMedAcesso+= mat[i][2]+Math.abs(mat[i][1]-valoranterior)+mat[i][3];
-            aux=mat[i][2]+Math.abs(mat[i][1]-valoranterior)+mat[i][3];
+        for (int i = 0; i < pesos.length; i++) {
+            tempMedEspera+=cilindroanterior-pesos[i][0];
+            tempMedAcesso+= pesos[i][2]+Math.abs(pesos[i][1]-valoranterior)+pesos[i][3];
+            aux=pesos[i][2]+Math.abs(pesos[i][1]-valoranterior)+pesos[i][3];
             cilindroanterior += aux;
-            valoranterior=mat[i][1];
+            valoranterior=pesos[i][1];
         }
 
-        System.out.println("Tempo medio de acesso: "+tempMedAcesso/mat.length+
-                "\nTempo médio de espera: "+tempMedEspera/mat.length);
+        resultado[0]=tempMedAcesso/pesos.length;
+        resultado[1]=tempMedEspera/pesos.length;
+        return resultado;
     }
 
     public void imprimeEntrada(){
@@ -102,4 +100,56 @@ class Leitor {
         }
     }
 
+    public void escreveArquivo() {
+        double[] fcfs;
+        fcfs = FCFS();
+        try {
+            FileWriter arq = new FileWriter("out.txt");
+            PrintWriter gravarArq = new PrintWriter(arq);
+
+            gravarArq.printf("FCFS%n" +
+                    "-AccessTime=%.2f%n" +
+                    "-WaitingTime=%.2f%n" +
+                    "SSTF%n" +
+                    "-AccessTime=%n" +
+                    "-WaitingTime=%n" +
+                    "SCAN%n" +
+                    "-AccessTime=%n" +
+                    "-WaitingTime=%n" +
+                    "C-SCAN%n" +
+                    "-AccessTime=%n" +
+                    "-WaitingTime=%n" +
+                    "C-LOOK%n" +
+                    "-AccessTime=%n" +
+                    "-WaitingTime=%n" +
+                    "MY%n" +
+                    "-AccessTime=??.??%n" +
+                    "-WaitingTime=??.??", fcfs[0], fcfs[1]);
+
+
+            arq.close();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    //Ordena em ordem crescente a ordem de chegada da matriz
+    public int[][] ordenador(){
+        int[] aux = new int[4];
+
+        for(int i = 0; i<pesos.length; i++) {
+            for (int j = 0; j < pesos.length - 1; j++) {
+                if (pesos[j][0] > pesos[j + 1][0]) {
+                    for (int k = 0; k < aux.length; k++)
+                        aux[k] = pesos[j][k];
+                    for (int k = 0; k < aux.length; k++)
+                        pesos[j][k] = pesos[j + 1][k];
+                    for (int k = 0; k < aux.length; k++)
+                        pesos[j + 1][k] = aux[k];
+
+                }
+            }
+        }
+    return pesos;
+    }
 }

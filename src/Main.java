@@ -8,7 +8,8 @@ public class Main {
         Leitor L = new Leitor("in.txt");
 
         L.imprimeEntrada();
-        L.FCFS(L.pesos);
+        L.ordenador();
+        L.escreveArquivo();
     }
 
 
