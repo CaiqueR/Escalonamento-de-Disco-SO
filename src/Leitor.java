@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 
 class Leitor {
     private static String path;
@@ -8,8 +9,11 @@ class Leitor {
     private int NumSectors;
     private int NumTracks;
     private int StartPosition;
-    ArrayList<String> numEmString = new ArrayList<String>();
     String linhaArq;
+    ArrayList<String> numEmString = new ArrayList<String>();
+    List<Integer> pesoos = new ArrayList<>();
+    public List<List<Integer>> processos = new ArrayList<>();
+
 
     public Leitor(String path) {
         this.path = path;
@@ -28,6 +32,7 @@ class Leitor {
                 }
             }
 
+
             pesos = new int[7][4];
             int k = 3;
 
@@ -38,23 +43,24 @@ class Leitor {
             StartPosition = Integer.parseInt(numEmString.get(2).replaceAll("\\D", ""));
 
 
-            for (int i = 0; i < 7; i++) {
+            int aux=3;
+            for (int i = 0; i < ((numEmString.size() / 4) - 1); i++) {
                 for (int j = 0; j < 4; j++) {
-
                     // Convertendo cada string em Double e armazenando em 'pesos'
                     //Essa parte teria que fazer alguma logica para poder sempre ir pegando de quatro em quatro
                     //Pq so aceita um arquivo com 7 processos
-                    if (k == 3 || k == 11 || k == 7 || k == 15 || k == 19 || k == 23 || k == 27)
-                        pesos[i][j] = Integer.parseInt(numEmString.get(k).substring(numEmString.get(k).lastIndexOf("=") + 1));
-                    else
-                        pesos[i][j] = Integer.parseInt(numEmString.get(k));
+                    if (k == aux) {
+                        pesoos.add(Integer.parseInt(numEmString.get(k).substring(numEmString.get(k).lastIndexOf("=") + 1)));
+                        aux+=4;
+                    }else
+                        pesoos.add(Integer.parseInt(numEmString.get(k)));
                     k++;
-
                 }
+                processos.add(pesoos);
+                pesoos = new ArrayList<>();
             }
-
-
             arq.close();
+
         } catch (FileNotFoundException f) {
             f.printStackTrace();
         } catch (InputMismatchException f) {
@@ -67,6 +73,27 @@ class Leitor {
     }
 
     public double[] FCFS() {
+        double tempMedAcesso=0;
+        double tempMedEspera=0;
+        double cilindroanterior=0;
+        double aux=0;
+        double[] resultado = new double[2];
+        int valoranterior=StartPosition;
+
+        for (int i = 0; i < processos.size(); i++) {
+            tempMedEspera+=cilindroanterior-processos.get(i).get(0);
+            tempMedAcesso+= processos.get(i).get(2)+Math.abs(processos.get(i).get(1)-valoranterior)+processos.get(i).get(3);
+            aux=processos.get(i).get(2)+Math.abs(processos.get(i).get(1)-valoranterior)+processos.get(i).get(3);
+            cilindroanterior += aux;
+            valoranterior=processos.get(i).get(1);
+        }
+
+        resultado[0]=tempMedAcesso/processos.size();
+        resultado[1]=tempMedEspera/processos.size();
+        return resultado;
+    }
+
+    public double[] SCAN() {
         double tempMedAcesso=0;
         double tempMedEspera=0;
         double cilindroanterior=0;
@@ -91,18 +118,17 @@ class Leitor {
         System.out.println("NumSectors: "+NumSectors);
         System.out.println("NumTracks: "+NumTracks);
         System.out.println("StartPosition: "+StartPosition);
-        for (int i = 0; i < pesos.length; i++) {
-            System.out.print("R"+(i+1)+": ");
-            for (int j = 0; j < pesos[0].length; j++) {
-                System.out.print(pesos[i][j]+" ");
-            }
-            System.out.println();
+        int cont=1;
+        for (List i: processos) {
+            System.out.println("R"+cont+": "+i);
+            cont++;
         }
     }
 
     public void escreveArquivo() {
-        double[] fcfs;
+        double[] fcfs, scan;
         fcfs = FCFS();
+        scan = SCAN();
         try {
             FileWriter arq = new FileWriter("out.txt");
             PrintWriter gravarArq = new PrintWriter(arq);
@@ -114,8 +140,8 @@ class Leitor {
                     "-AccessTime=%n" +
                     "-WaitingTime=%n" +
                     "SCAN%n" +
-                    "-AccessTime=%n" +
-                    "-WaitingTime=%n" +
+                    "-AccessTime=%.2f%n" +
+                    "-WaitingTime=%.2f%n" +
                     "C-SCAN%n" +
                     "-AccessTime=%n" +
                     "-WaitingTime=%n" +
@@ -124,7 +150,7 @@ class Leitor {
                     "-WaitingTime=%n" +
                     "MY%n" +
                     "-AccessTime=??.??%n" +
-                    "-WaitingTime=??.??", fcfs[0], fcfs[1]);
+                    "-WaitingTime=??.??", fcfs[0], fcfs[1], scan[0], scan[1]);
 
 
             arq.close();
@@ -152,4 +178,24 @@ class Leitor {
         }
         return pesos;
     }
+
+    public int[][] ordenadorSCAN(){
+        int[] aux = new int[4];
+
+        for(int i = 0; i<=pesos.length; i++) {
+            for (int j= 0; j < pesos.length - 1; j++) {
+                if (pesos[j][1]<StartPosition && pesos[j][1] < pesos[j + 1][1] ) {
+                    for (int k = 0; k < aux.length; k++)
+                        aux[k] = pesos[j][k];
+                    for (int k = 0; k < aux.length; k++)
+                        pesos[j][k] = pesos[j + 1][k];
+                    for (int k = 0; k < aux.length; k++)
+                        pesos[j + 1][k] = aux[k];
+
+                }
+            }
+        }
+        return pesos;
+    }
+
 }
