@@ -5,7 +5,6 @@ import java.util.List;
 
 class Leitor {
     private static String path;
-    public static int[][] pesos = null;
     private int NumSectors;
     private int NumTracks;
     private int StartPosition;
@@ -32,8 +31,6 @@ class Leitor {
                 }
             }
 
-
-            pesos = new int[7][4];
             int k = 3;
 
             //Pega os valores de NumSectors e NumTracks e StartPosition separado do resto, so
@@ -101,16 +98,16 @@ class Leitor {
         double[] resultado = new double[2];
         int valoranterior=StartPosition;
 
-        for (int i = 0; i < pesos.length; i++) {
-            tempMedEspera+=cilindroanterior-pesos[i][0];
-            tempMedAcesso+= pesos[i][2]+Math.abs(pesos[i][1]-valoranterior)+pesos[i][3];
-            aux=pesos[i][2]+Math.abs(pesos[i][1]-valoranterior)+pesos[i][3];
+        for (int i = 0; i < processos.size(); i++) {
+            tempMedEspera+=cilindroanterior-processos.get(i).get(0);
+            tempMedAcesso+= processos.get(i).get(2)+Math.abs(processos.get(i).get(1)-valoranterior)+processos.get(i).get(3);
+            aux=processos.get(i).get(2)+Math.abs(processos.get(i).get(1)-valoranterior)+processos.get(i).get(3);
             cilindroanterior += aux;
-            valoranterior=pesos[i][1];
+            valoranterior=processos.get(i).get(1);
         }
 
-        resultado[0]=tempMedAcesso/pesos.length;
-        resultado[1]=tempMedEspera/pesos.length;
+        resultado[0]=tempMedAcesso/processos.size();
+        resultado[1]=tempMedEspera/processos.size();
         return resultado;
     }
 
@@ -158,44 +155,4 @@ class Leitor {
             e.printStackTrace();
         }
     }
-
-    //Ordena em ordem crescente a ordem de chegada da matriz
-    public int[][] ordenador(){
-        int[] aux = new int[4];
-
-        for(int i = 0; i<pesos.length; i++) {
-            for (int j = 0; j < pesos.length - 1; j++) {
-                if (pesos[j][0] > pesos[j + 1][0]) {
-                    for (int k = 0; k < aux.length; k++)
-                        aux[k] = pesos[j][k];
-                    for (int k = 0; k < aux.length; k++)
-                        pesos[j][k] = pesos[j + 1][k];
-                    for (int k = 0; k < aux.length; k++)
-                        pesos[j + 1][k] = aux[k];
-
-                }
-            }
-        }
-        return pesos;
-    }
-
-    public int[][] ordenadorSCAN(){
-        int[] aux = new int[4];
-
-        for(int i = 0; i<=pesos.length; i++) {
-            for (int j= 0; j < pesos.length - 1; j++) {
-                if (pesos[j][1]<StartPosition && pesos[j][1] < pesos[j + 1][1] ) {
-                    for (int k = 0; k < aux.length; k++)
-                        aux[k] = pesos[j][k];
-                    for (int k = 0; k < aux.length; k++)
-                        pesos[j][k] = pesos[j + 1][k];
-                    for (int k = 0; k < aux.length; k++)
-                        pesos[j + 1][k] = aux[k];
-
-                }
-            }
-        }
-        return pesos;
-    }
-
 }
