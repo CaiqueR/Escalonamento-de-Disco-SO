@@ -28,10 +28,10 @@ public class Processos {
         double tempMedEspera = 0;
         //Pega o resultado do cilindro anterior e soma com o valoratual
         double resultadoCilindroAnterior = 0;
-        // Pega o valor do cilindro anterior e atribui a varialvel
+        // Pega o valor do cilindro anterior e atribui a variavel
         int valorCilindroAnterior = StartPosition;
 
-        // Varialvel para verificar se o processo ja chegou
+        // variavel para verificar se o processo ja chegou
         int tempMedParcialdeEspera = 0;
 
         double[] resultado = new double[2];
@@ -39,7 +39,7 @@ public class Processos {
 
         for (int i = 0; i < processos.size(); i++) {
             // Verificar se o processo chegou
-            if(processos.get(i).get(0) <= tempMedParcialdeEspera) {
+            if (processos.get(i).get(0) <= tempMedParcialdeEspera) {
                 tempMedEspera += resultadoCilindroAnterior - processos.get(i).get(0);
                 tempMedAcesso += processos.get(i).get(2) + Math.abs(processos.get(i).get(1) - valorCilindroAnterior) + processos.get(i).get(3);
                 resultadoCilindroAnterior += processos.get(i).get(2) + Math.abs(processos.get(i).get(1) - valorCilindroAnterior) + processos.get(i).get(3);
@@ -60,14 +60,14 @@ public class Processos {
         //Pega o resultado do cilindro anterior e soma com o valoratual
         double resultadoCilindroAnterior = 0;
 
-        // Pega o valor do cilindro anterior e atribui a varialvel
+        // Pega o valor do cilindro anterior e atribui a variavel
         int valorCilindroAnterior = StartPosition;
 
         // Varial com funcao de obter o valor mais perto do cilindro atual, é atribuido como
         // valor inicial 9999999 para se conseguir o menor valor
         double maisPerto = 9999999;
 
-        // Varialvel para verificar se o processo ja chegou
+        // variavel para verificar se o processo ja chegou
         int tempMedParcialdeEspera = 0;
 
         // Variavel para guardar a posicao que foi obtida do processo mais perto
@@ -131,17 +131,12 @@ public class Processos {
     }
 
     private double[] CSCAN() {
-        double[] resultado = new double[2];
-        return resultado;
-    }
-
-    private double[] CLOOK() {
         double tempMedAcesso = 0;
         double tempMedEspera = 0;
         //Pega o resultado do cilindro anterior e soma com o valoratual
         double resultadoCilindroAnterior = 0;
 
-        // Pega o valor do cilindro anterior e atribui a varialvel
+        // Pega o valor do cilindro anterior e atribui a variavel
         int valorCilindroAnterior = StartPosition;
 
         // Variavel para verificar se o cilindro procurado foi encontrado
@@ -153,7 +148,102 @@ public class Processos {
         // Variavel para armazenar numeros de processos existentes, pois sao removidos
         int numeroDeProcessos = processos.size();
 
-        // Varialvel para verificar se o processo ja chegou
+        // variavel para verificar se o processo ja chegou
+        int tempMedParcialdeEspera = 0;
+
+        // Criado um novo List, pois os processos sao removidos da lista, entao e criada um
+        // lista nova para armazenar os valores e nao atrapalhar os outros metodos
+        List<List<Integer>> processoscscan = new ArrayList<>(processos);
+
+        // Variavel que obtem o maior valor do cilindro de todos os processos
+        int valorfinal = processoscscan.stream().sorted(Comparator.comparing(x -> x.get(1))).collect(Collectors.toList()).get(processoscscan.size() - 1).get(1) + 1;
+
+        double[] resultado = new double[2];
+
+        int valorBuscado = processoscscan.get(0).get(1);
+        int valorAnteriorTeste = StartPosition;
+        int variavelSomaAuxiliar = 0;
+        boolean auxiliar = true;
+        // Organizando a List para conseguir pegar sempre os maiores processos e depois voltar nos menores que restaram
+        processoscscan = processoscscan.stream().sorted(Comparator.comparing(x -> x.get(1))).collect(Collectors.toList());
+
+        while (processoscscan.size() != 0) {
+            //For para percorrer todos os processos e verificar se existem
+            for (int j = valorAnteriorTeste; j < NumSectors; j++) {
+
+                // For para verificar se o cilindro atual e o desejado, caso seja, e pego sua
+                // posicao e atribuido true a variavel achou
+                if (j == valorBuscado)
+                    for (int k = 0; k < processoscscan.size(); k++) {
+                        // Verificar se o processo desejado é igual ao que estamos percorrendo e verificar se o processo chegou
+                        if (processoscscan.get(k).get(1) == valorBuscado && processoscscan.get(k).get(0) <= tempMedParcialdeEspera && auxiliar) {
+                            pos = k;
+                            achou = true;
+                            auxiliar = false;
+                        }
+
+                        if (processoscscan.get(k).get(1) == j && processoscscan.get(k).get(0) <= tempMedParcialdeEspera && auxiliar == false) {
+                            pos = k;
+                            achou = true;
+                            System.out.println(processoscscan.get(k).get(1));
+                            System.out.println(processoscscan);
+
+                        }
+                        if (auxiliar == false)
+                            valorBuscado = j + 1;
+
+                    }
+
+
+                if (j == NumSectors - 1) {
+                    variavelSomaAuxiliar += Math.abs(j - valorAnteriorTeste) + Math.abs(0 - j);
+                    valorAnteriorTeste = 0;
+                    if (auxiliar == false)
+                        valorBuscado = 0;
+                }
+
+
+                // Verificar se caso tenha achado o processo desejado, se sim
+                // os calculos sao feitos
+                if (achou) {
+                    tempMedEspera += resultadoCilindroAnterior - processoscscan.get(pos).get(0);
+                    tempMedAcesso += processoscscan.get(pos).get(2) + Math.abs(processoscscan.get(pos).get(1) - valorAnteriorTeste) + processoscscan.get(pos).get(3) + variavelSomaAuxiliar;
+                    resultadoCilindroAnterior += processoscscan.get(pos).get(2) + Math.abs(processoscscan.get(pos).get(1) - valorAnteriorTeste) + processoscscan.get(pos).get(3)+ variavelSomaAuxiliar;
+                    valorAnteriorTeste = processoscscan.get(pos).get(1);
+                    variavelSomaAuxiliar = 0;
+                    processoscscan.remove(pos);
+                    pos = 0;
+                    achou = false;
+                    tempMedParcialdeEspera += tempMedAcesso;
+                }
+
+            }
+        }
+
+        resultado[0] = tempMedAcesso / numeroDeProcessos;
+        resultado[1] = tempMedEspera / numeroDeProcessos;
+        return resultado;
+    }
+
+    private double[] CLOOK() {
+        double tempMedAcesso = 0;
+        double tempMedEspera = 0;
+        //Pega o resultado do cilindro anterior e soma com o valoratual
+        double resultadoCilindroAnterior = 0;
+
+        // Pega o valor do cilindro anterior e atribui a variavel
+        int valorCilindroAnterior = StartPosition;
+
+        // Variavel para verificar se o cilindro procurado foi encontrado
+        boolean achou = false;
+
+        // Variavel usada como auxiliar para pegar a posicao obtida
+        int pos = 0;
+
+        // Variavel para armazenar numeros de processos existentes, pois sao removidos
+        int numeroDeProcessos = processos.size();
+
+        // variavel para verificar se o processo ja chegou
         int tempMedParcialdeEspera = 0;
 
         // Criado um novo List, pois os processos sao removidos da lista, entao e criada um
@@ -186,7 +276,7 @@ public class Processos {
             if (j == valorfinal) {
                 for (int k = 0; k < processosclook.size(); k++) {
                     // Verificar se o processo chegou
-                    if(processos.get(k).get(0) <= tempMedParcialdeEspera) {
+                    if (processos.get(k).get(0) <= tempMedParcialdeEspera) {
                         tempMedEspera += resultadoCilindroAnterior - processosclook.get(k).get(0);
                         tempMedAcesso += processosclook.get(k).get(2) + Math.abs(processosclook.get(k).get(1) - valorCilindroAnterior) + processosclook.get(k).get(3);
                         resultadoCilindroAnterior += processosclook.get(k).get(2) + Math.abs(processosclook.get(k).get(1) - valorCilindroAnterior) + processosclook.get(k).get(3);
