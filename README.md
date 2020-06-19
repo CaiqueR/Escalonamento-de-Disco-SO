@@ -4,8 +4,6 @@
 
 ## Trabalho para matéria de Sistemas Operacionais lecionado pelo professor Lesandro Ponciano
 
----
-
 ## 💻 Objetivo
 
 - O trabalho consiste em simular os escalonamentos de disco FCFS, SSTF, SCAN, C-SCAN, C-LOOK.
